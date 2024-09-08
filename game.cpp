@@ -3,8 +3,9 @@
 #include <SFML/Graphics.hpp>
 #include <cstdlib>
 #include <ctime>
-#include <vector>
+
 using namespace game_h;
+int waiting_tile_count, num_player;
 
 stb::stb() : window(sf::VideoMode(1280, 720), "Shut the Box") {
 	if (!font.loadFromFile("arial.ttf")){
@@ -22,20 +23,34 @@ stb::stb() : window(sf::VideoMode(1280, 720), "Shut the Box") {
 	player_text.setFont(font);
 	player_text.setCharacterSize(32);
 	player_text.setFillColor(sf::Color::White);
-	player_text.setPosition(100, 500);
+	player_text.setPosition(250, 100);
+
+
 }
 
 void stb::create_tiles() {
 	for (int i = 0; i < num_tile; i++) {
 		sf::RectangleShape tile(sf::Vector2f(80, 80));
 		tile.setPosition(50 + i * 90, 600);
-		tile.setFillColor(sf::Color::Transparent);
+		tile.setFillColor(sf::Color::White);
 		tiles.push_back(tile);
 			
 	}
 
 }
 
+void stb :: create_num() {
+
+	for (int i = 0; i < num_tile; ++i) {
+		number.setFont(font);
+		number.setString(std::to_string(i + 1));
+		number.setCharacterSize(32);
+		number.setFillColor(sf::Color::Black);
+		number.setPosition(50 + i * 90 + 30, 600);
+		numbers.push_back(number);
+	}
+
+}
 
 void stb::dice_roll() {
 	srand((unsigned int)(time)(NULL));
@@ -70,25 +85,43 @@ void stb::event() {
 
 		}
 		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Num1) {
-			game1();
-			player_text.setString(" ");
-			std::cin >> num_tile;
+			//game1();
+			player_text.setString("How many tiles are we playing with? (9, 10 or 12 [press A,B, or C ])");
+			waiting_tile_count = true;
+			num_player = 1;
 
-			if (num_tile != 9 || num_tile != 10 || num_tile != 12)
-				std::cin >> num_tile;
-			else
-				player_text.setString(" ");
 		}
 		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Num2) {
-			game2();
-			player_text.setString("How many tiles are we playing with? (9, 10 or 12, enter in the console)");
-			std::cin >> num_tile;
-			
-			if (num_tile != 9||num_tile!=10|| num_tile != 12)
-				std::cin >> num_tile;
-			else
-			player_text.setString(" ");
+			//game2();
+			player_text.setString("How many tiles are we playing with? (9, 10 or 12 [press A,B, or C ])");
+			waiting_tile_count = true;
+			num_player = 2;
 
+		}
+		if (waiting_tile_count == true) {
+			if (event.type == sf::Event::KeyPressed) {
+				if (event.key.code == sf::Keyboard::A) {
+					num_tile = 9;
+					waiting_tile_count = false;
+					player_text.setString(" ");
+					create_tiles();
+					create_num();
+				}
+				if (event.key.code == sf::Keyboard::B) {
+					num_tile = 10;
+					waiting_tile_count = false;
+					player_text.setString(" ");
+					create_tiles();
+					create_num();
+				}
+				if (event.key.code == sf::Keyboard::C) {
+					num_tile = 12;
+					waiting_tile_count = false;
+					player_text.setString(" ");
+					create_tiles();
+					create_num();
+				}
+			}
 		}
 	}
 }
@@ -100,11 +133,21 @@ void stb::run() {
 	}
 }
 void stb::tile_click(int mouse_x, int mouse_y) {
-	for 
+	for (auto& tile : tiles) {
+		if (tile.getGlobalBounds().contains(static_cast<float>(mouse_x), static_cast<float>(mouse_y)))
+		{
+			tile.setFillColor(sf::Color::Black);
+		}
+	}
 
 }
 void stb::update() {
-	dice_text.setString("Rolled " + std::to_string(dice1) + " and " + std::to_string(dice2));
+
+	if (waiting_tile_count == false) {
+		player_text.setString("1 player or 2 players? (press 1 or 2)");
+	}
+	dice_text.setString("Rolled " + std::to_string(dice1) + " and " + std::to_string(dice2) + " for a sum of: " + std::to_string(dice1 + dice2));
+
 }
 
 void stb::render() {
@@ -115,7 +158,9 @@ void stb::render() {
 	for (auto& tile : tiles) {
 		window.draw(tile);
 	}
-
+	for (auto& number : numbers) {
+		window.draw(number);
+	}
 
 
 	window.display();
@@ -123,8 +168,3 @@ void stb::render() {
 
 }
 
-void stb::choice() {
-
-	player_text.setString("1 player or 2 players? (press 1 or 2)");
-
-}
